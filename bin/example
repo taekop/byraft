@@ -1,0 +1,19 @@
+#!/bin/bash
+
+port1=50051
+port2=50052
+port3=50053
+if [ -z ${1+x} ]; then echo "Please set id from 1 to 3"; fi
+script_dir=$(dirname $0)
+id=$1
+case ${id} in
+  1)
+    port=${port1}
+    ;;
+  2)
+    port=${port2}
+    ;;
+  3)
+    port=${port3}
+esac
+bundle exec ${script_dir}/byraft -i ${id} -p ${port} -n 1=localhost:${port1} -n 2=localhost:${port2} -n 3=localhost:${port3} -v

@@ -1,0 +1,61 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'byraft'
+
+params = {}
+OptionParser.new do |parser|
+  parser.banner = <<-BANNER
+Run byraft application
+Usage:  byraft [options]
+        -h --help           Print help
+        -i <id>             Configure id for current node
+        -p <port>           Configure port for current node
+        -n <id>=<address>   Configure node id and address
+        -e <range>          Configure election timeout in sec (ex) 0.1, 0.1:0.3
+        -u                  Configure update period in sec
+        -v                  Configure verbose option
+Option:
+  BANNER
+  parser.on("-h", "--help") do
+    puts parser
+    exit
+  end
+  parser.on("-i", "--id <id>", String) do |id|
+    params[:id] = id
+  end
+  parser.on("-p", "--port <port>", Integer) do |port|
+    params[:port] = port
+  end
+  parser.on("-n", "--node <id>=<address>", String) do |str|
+    id, address = str.split('=')
+    params[:node] ||= {}
+    params[:node][id] = address
+  end
+  parser.on("-e", "--e <range>", String) do |str|
+    s, e = str.split(':')
+    e = s unless e
+    s, e = s.to_f, e.to_f
+    params[:election_timeout] = s..e
+  end
+  parser.on("-u", "--update <period>", Float) do |p|
+    params[:update_period] = p
+  end
+  parser.on("-v", "--verbose", TrueClass) do |v|
+    params[:verbose] = v
+  end
+end.parse!
+
+unless params[:id]
+  puts "Please configure id (ex) -i 1"
+  exit
+end
+
+unless params[:node]
+  puts "Please configure nodes (ex) -n 1=localhost:50051"
+  exit
+end
+
+id, port, nodes, opts = params[:id], params[:port], params[:node], params.except(:id, :port, :node)
+Byraft.start(id, port, nodes, **opts)
+Byraft.join
