@@ -13,7 +13,7 @@ Usage:  byraft [options]
         -p <port>           Configure port for current node
         -n <id>=<address>   Configure node id and address
         -e <range>          Configure election timeout in sec (ex) 0.1, 0.1:0.3
-        -u                  Configure update period in sec
+        -t                  Configure heartbeat period in sec
         -v                  Configure verbose option
 Option:
   BANNER
@@ -38,8 +38,8 @@ Option:
     s, e = s.to_f, e.to_f
     params[:election_timeout] = s..e
   end
-  parser.on("-u", "--update <period>", Float) do |p|
-    params[:update_period] = p
+  parser.on("-t", "--heartbeat <period>", Float) do |p|
+    params[:heartbeat_period] = p
   end
   parser.on("-v", "--verbose", TrueClass) do |v|
     params[:verbose] = v
@@ -56,6 +56,7 @@ unless params[:node]
   exit
 end
 
+params[:logger_level] = params.delete(:verbose) ? 0 : 1
 id, port, nodes, opts = params[:id], params[:port], params[:node], params.except(:id, :port, :node)
 Byraft.start(id, port, nodes, **opts)
 Byraft.join

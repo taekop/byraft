@@ -12,8 +12,9 @@ module Byraft
         Time.now.to_f > @heartbeat_time + @next_election_timeout
       end
 
-      def until_election_timeout
-        (@heartbeat_time + @next_election_timeout - Time.now.to_f).clamp(0.1..)
+      # half timeout to prevent leader switching due to delayed response
+      def until_next_election
+        (@heartbeat_time + @next_election_timeout / 2 - Time.now.to_f).clamp(0.1..)
       end
     end
   end

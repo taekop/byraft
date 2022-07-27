@@ -1,7 +1,7 @@
 require 'spec_helper'
 
 RSpec.describe Byraft::Node do
-  let(:node) { Byraft::Node.new('1', { '1' => '0.0.0.0:50051', '2' => '0.0.0.0:50052', '3' => '0.0.0.0:50053' }) }
+  let(:node) { Byraft::Node.new('1', { '1' => '0.0.0.0:50051', '2' => '0.0.0.0:50052', '3' => '0.0.0.0:50053' }).tap { |node| node.logger.level = 2 } }
 
   describe 'append entries' do
     it '> reset election timer' do
@@ -37,7 +37,7 @@ RSpec.describe Byraft::Node do
       node.current_term = 1
       node.log.append(Byraft::Node::Entry.new(1, 1, 'INCONSISTENT'))
       msg = Byraft::GRPC::AppendEntriesRequest.new(term: 2, leader_id: '2', prev_log_index: 0, prev_log_term: 0, entries: [Byraft::GRPC::Entry.new(index: 1, term: 2, command: 'CONSISTENT')], leader_commit: 1)
-      expect(node).to receive(:execute_command).with('CONSISTENT')
+      expect(node.executor).to receive(:call).with('CONSISTENT')
       res = node.append_entries(msg, nil)
       expect(res.term).to eq 2
       expect(res.success).to be_truthy
@@ -114,7 +114,7 @@ RSpec.describe Byraft::Node do
     end
   end
 
-  describe 'update' do
+  describe 'heartbeat' do
     context 'follower' do
       before(:each) do
         node.follower!
@@ -123,7 +123,7 @@ RSpec.describe Byraft::Node do
       it '> become candidate when election timeout' do
         allow(node).to receive(:election_timeout?).and_return(true)
         expect(node).to receive(:change_role).with(:candidate)
-        node.update
+        node.heartbeat
       end
     end
 
@@ -135,7 +135,7 @@ RSpec.describe Byraft::Node do
       it '> become candidate when election timeout' do
         allow(node).to receive(:election_timeout?).and_return(true)
         expect(node).to receive(:change_role).with(:candidate)
-        node.update
+        node.heartbeat
       end
     end
 
@@ -146,7 +146,7 @@ RSpec.describe Byraft::Node do
 
       it '> send heartbeat messages' do
         expect(node).to receive(:request_append_entries).with(true)
-        node.update
+        node.heartbeat
       end
     end
   end
@@ -273,12 +273,14 @@ RSpec.describe Byraft::Node do
         node.request_append_entries
       end
 
-      it '> send request to nodes until consistent' do
+      it '> decrease next index if fail' do
         multiple_stub_append_entries([[1, false], [1, true]])
+        allow(node).to receive(:commit!)
         node.clients.values.each do |client|
-          expect(client).to receive(:append_entries).twice
+          expect(client).to receive(:append_entries)
         end
         node.request_append_entries
+        expect(node.next_index).to eq({ '2' => 1, '3' => 1 })
       end
 
       it '> become follower when other leader detected' do
@@ -289,6 +291,19 @@ RSpec.describe Byraft::Node do
         node.request_append_entries
         expect(node.follower?).to be_truthy
       end
+    end
+  end
+
+  describe 'commit!' do
+    before(:each) do
+      node.current_term = 1
+      node.commit_index = 1
+      node.log.append(Byraft::Node::Entry.new(1, 1, 'command'))
+    end
+
+    it '> execute command' do
+      expect(node.executor).to receive(:call).with('command')
+      node.commit!
     end
   end
 end

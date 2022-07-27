@@ -17,7 +17,7 @@ RSpec.describe Byraft::Node::ElectionTimer do
   it '> until election timeout' do
     Timecop.freeze(Time.now)
     obj.reset_election_timer!
-    expect(obj.until_election_timeout).to eq 60
+    expect(obj.until_next_election).to eq 30
     Timecop.return
     Timecop.freeze(Time.now + 60)
     expect(obj.election_timeout?).to be_truthy

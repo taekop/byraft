@@ -32,6 +32,16 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     optional :term, :int32, 1
     optional :vote_granted, :bool, 2
   end
+
+  add_message "byraft.AppendLogRequest" do
+    optional :command, :string, 1
+  end
+
+  add_message "byraft.AppendLogResponse" do
+    optional :success, :bool, 1
+    optional :leader_id, :string, 2
+    optional :leader_address, :string, 3
+  end
 end
 
 module Byraft
@@ -41,5 +51,7 @@ module Byraft
     AppendEntriesResponse = Google::Protobuf::DescriptorPool.generated_pool.lookup("byraft.AppendEntriesResponse").msgclass
     RequestVoteRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("byraft.RequestVoteRequest").msgclass
     RequestVoteResponse = Google::Protobuf::DescriptorPool.generated_pool.lookup("byraft.RequestVoteResponse").msgclass
+    AppendLogRequest = Google::Protobuf::DescriptorPool.generated_pool.lookup("byraft.AppendLogRequest").msgclass
+    AppendLogResponse = Google::Protobuf::DescriptorPool.generated_pool.lookup("byraft.AppendLogResponse").msgclass
   end
 end

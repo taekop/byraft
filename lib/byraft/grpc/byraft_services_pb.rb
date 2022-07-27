@@ -16,6 +16,7 @@ module Byraft
 
           klass.rpc :AppendEntries, AppendEntriesRequest, AppendEntriesResponse
           klass.rpc :RequestVote, RequestVoteRequest, RequestVoteResponse
+          klass.rpc :AppendLog, AppendLogRequest, AppendLogResponse
         end
       end
     end

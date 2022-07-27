@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+
+require 'optparse'
+require 'byraft'
+
+banner = <<-BANNER
+Request AppendLog to byraft application
+Usage:  client <address> <command> [options]
+        -h --help           Print help
+Option:
+BANNER
+OptionParser.new do |parser|
+  parser.banner = banner
+  parser.on("-h", "--help") do
+    puts banner
+    exit
+  end
+end.parse!
+
+if ARGV.size < 2
+  puts banner
+  exit
+end
+
+address, command = ARGV[0], ARGV[1]
+client = Byraft::GRPC::Stub.new(address, :this_channel_is_insecure)
+begin
+  res = client.append_log(Byraft::GRPC::AppendLogRequest.new(command: command))
+  if res.success
+    puts "Success."
+  elsif res.leader_id.empty? || res.leader_address.empty?
+    puts "Failed to request: No leader available"
+  else
+    puts "Retry to leader Node##{res.leader_id}: #{res.leader_address}"
+  end
+rescue GRPC::Unavailable => e
+  puts "Failed to request: #{e}"
+end

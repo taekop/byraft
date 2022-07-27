@@ -7,6 +7,19 @@ module Byraft
 
       attr_accessor :role
 
+      def current_role
+        case @role
+        when FOLLOWER
+          :follower
+        when CANDIDATE
+          :candidate
+        when LEADER
+          :leader
+        else
+          raise "Invalid value for role: #{@role} must be in #{[FOLLOWER, CANDIDATE, LEADER]}"
+        end
+      end
+
       def leader!
         @role = LEADER
       end
