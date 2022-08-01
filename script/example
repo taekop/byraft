@@ -1,0 +1,75 @@
+#!/bin/bash
+
+function help {
+  # Display Help
+  echo "Run byraft example"
+  echo "Syntax:  example <id> [-v] [-c <command>] [-n <number>]"
+  echo "         -n      Number of nodes, default value is 3"
+  echo "         -c      Request command as client."
+  echo "         -v      Set logger level to DEBUG, otherwise INFO"
+}
+
+args=()
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+  -c | --command)
+    command="$2"
+    shift
+    shift
+    ;;
+  -n | --nodes)
+    nodes="$2"
+    shift
+    shift
+    ;;
+  -v | --verbose)
+    verbose=1
+    shift
+    ;;
+  -h | --help)
+    help
+    exit
+    ;;
+  -* | --*)
+    echo "Unknown option $1"
+    exit 1
+    ;;
+  *)
+    args+=("$1") # save positional arg
+    shift
+    ;;
+  esac
+done
+
+script_dir=$(dirname $0)
+id=${args[0]}
+if [ -z "$id" ]; then
+  help
+  exit
+fi
+port=$((id + 50050))
+
+# default is 3
+nodes="${nodes:-3}"
+
+# whether client
+if [ -z "$command" ]; then
+  # check id is valid
+  if ((id < 1 || id > ${nodes})); then
+    echo "ID out of range 1..${nodes}"
+    exit
+  fi
+
+  args=()
+  args+=("-i" "${id}")
+  args+=("-p" "${port}")
+  for i in $(seq 1 $nodes); do
+    args+=("-n" "${i}=localhost:$((i + 50050))")
+  done
+  if [ ! -z "$verbose" ]; then args+=("-v"); fi
+
+  ${script_dir}/byraft "${args[@]}"
+else
+  ${script_dir}/client localhost:${port} ${command}
+fi

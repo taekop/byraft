@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    byraft (0.2.0)
+    byraft (0.3.0)
       grpc (~> 1)
 
 GEM

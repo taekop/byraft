@@ -1,22 +1,22 @@
 #!/usr/bin/env ruby
 
 require 'optparse'
-require 'byraft'
+require_relative '../lib/byraft'
 
 params = {}
-OptionParser.new do |parser|
-  parser.banner = <<-BANNER
+BANNER = <<-BANNER
 Run byraft application
 Usage:  byraft [options]
-        -h --help           Print help
+Option: -h --help           Print help
         -i <id>             Configure id for current node
         -p <port>           Configure port for current node
         -n <id>=<address>   Configure node id and address
         -e <range>          Configure election timeout in sec (ex) 0.1, 0.1:0.3
         -t                  Configure heartbeat period in sec
         -v                  Configure verbose option
-Option:
-  BANNER
+BANNER
+OptionParser.new do |parser|
+  parser.banner = BANNER
   parser.on("-h", "--help") do
     puts parser
     exit
@@ -46,13 +46,8 @@ Option:
   end
 end.parse!
 
-unless params[:id]
-  puts "Please configure id (ex) -i 1"
-  exit
-end
-
-unless params[:node]
-  puts "Please configure nodes (ex) -n 1=localhost:50051"
+if params[:id].nil? || params[:node].nil?
+  puts BANNER
   exit
 end
 

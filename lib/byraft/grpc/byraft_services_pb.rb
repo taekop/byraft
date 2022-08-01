@@ -12,7 +12,7 @@ module Byraft
 
           klass.marshal_class_method = :encode
           klass.unmarshal_class_method = :decode
-          klass.service_name = 'byraft.RaftNode'
+          klass.service_name = 'raft.Raft'
 
           klass.rpc :AppendEntries, AppendEntriesRequest, AppendEntriesResponse
           klass.rpc :RequestVote, RequestVoteRequest, RequestVoteResponse

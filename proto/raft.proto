@@ -1,5 +1,7 @@
 syntax = "proto3";
 
+package raft;
+
 message Entry {
   optional int32 index = 1;
   optional int32 term = 2;
@@ -42,7 +44,7 @@ message AppendLogResponse {
     optional string leader_address = 3;
 }
 
-service Byraft {
+service Raft {
     rpc AppendEntries(AppendEntriesRequest) returns(AppendEntriesResponse) {}
     rpc RequestVote(RequestVoteRequest) returns(RequestVoteResponse) {}
     rpc AppendLog(AppendLogRequest) returns(AppendLogResponse) {}

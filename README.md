@@ -5,41 +5,65 @@ Byraft is an implementation of Raft consensus algorithm in Ruby using gRPC.
 ## Install
 
 ```shell
-bundle install
+gem install grpc
 ```
+
+## Usage
+
+```shell
+script/byraft # run server
+script/client # request as client
+```
+
+## Spec
+
+[raft.proto](proto/raft.proto)
 
 ## Example
 
-Three nodes communicates each other with the following configuration.
-- `election timeout` between 1 and 2 sec
-- `heartbeat period` as 0.1 sec
-- `verbose` print DEBUG msg
-- Write commited entries in log/log-node-<id>.txt
-- Nodes
-  - #1 on localhost:50051
-  - #2 on localhost:50052
-  - #3 on localhost:50053
+Configuration
 
-Run examples in different terminal tabs.
+- `election timeout` : between 1 and 2 sec
+- `heartbeat period` : 0.1 sec
+- Write committed commands in log/log-node-\<id\>.txt
+- Nodes
+    - #1 on localhost:50051
+    - #2 on localhost:50052
+    - ...
+
+Options
+
+- `-n <number of nodes>` : default is 3
+- `-c <command>` : request command as client
+- `-v` : set logger level to DEBUG, otherwise INFO
+
+Run servers in different terminals.
 
 ```shell
-bin/example 1 # terminal 1
-bin/example 2 # terminal 2
-bin/example 3 # terminal 3
+script/example 1 -n 5 # terminal 1
+script/example 2 -n 5 # terminal 2
+script/example 3 -n 5 # terminal 3
+script/example 4 -n 5 # terminal 4
+script/example 5 -n 5 # terminal 5
 ```
 
 Run client to append log.
 
 ```shell
-bundle exec bin/client localhost:50051 command
+script/example 1 -c 'RUN COMMAND' # another terminal
 ```
 
 ## Test
 
 ```shell
-# rspec
-bin/test
+bundle install
+bundle exec rspec
 ```
+
+## TODO
+
+- [Liveness in the face of Network Faults](https://decentralizedthoughts.github.io/2020-12-12-raft-liveness-full-omission/)
+- Make gem
 
 ## Reference
 

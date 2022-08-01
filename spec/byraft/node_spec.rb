@@ -1,7 +1,12 @@
 require 'spec_helper'
 
 RSpec.describe Byraft::Node do
-  let(:node) { Byraft::Node.new('1', { '1' => '0.0.0.0:50051', '2' => '0.0.0.0:50052', '3' => '0.0.0.0:50053' }).tap { |node| node.logger.level = 2 } }
+  let(:node) do
+    node = Byraft::Node.new('1', { '1' => '0.0.0.0:50051', '2' => '0.0.0.0:50052', '3' => '0.0.0.0:50053' })
+    node.reset_election_timer!
+    node.logger.level = 2
+    node
+  end
 
   describe 'append entries' do
     it '> reset election timer' do
@@ -145,7 +150,7 @@ RSpec.describe Byraft::Node do
       end
 
       it '> send heartbeat messages' do
-        expect(node).to receive(:request_append_entries).with(true)
+        expect(node).to receive(:request_append_entries)
         node.heartbeat
       end
     end
@@ -164,7 +169,7 @@ RSpec.describe Byraft::Node do
     end
 
     it '> become leader, initialize leader state, and send heartbeat messages' do
-      expect(node).to receive(:request_append_entries).with(true)
+      expect(node).to receive(:request_append_entries)
       node.change_role(:leader)
       expect(node.leader?).to be_truthy
       expect(node.next_index).to eq({ '2' => 1, '3' => 1 })
@@ -246,7 +251,7 @@ RSpec.describe Byraft::Node do
         node.clients.values.each do |client|
           expect(client).to receive(:append_entries)
         end
-        node.request_append_entries(true)
+        node.request_append_entries
       end
 
       it '> become follower when other leader detected' do
@@ -254,7 +259,7 @@ RSpec.describe Byraft::Node do
         node.clients.values.each do |client|
           expect(client).to receive(:append_entries)
         end
-        node.request_append_entries(true)
+        node.request_append_entries
         expect(node.follower?).to be_truthy
       end
     end

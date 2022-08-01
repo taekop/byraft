@@ -1,13 +1,12 @@
 #!/usr/bin/env ruby
 
 require 'optparse'
-require 'byraft'
+require_relative '../lib/byraft'
 
 banner = <<-BANNER
 Request AppendLog to byraft application
 Usage:  client <address> <command> [options]
-        -h --help           Print help
-Option:
+Option: -h --help           Print help
 BANNER
 OptionParser.new do |parser|
   parser.banner = banner
@@ -22,7 +21,8 @@ if ARGV.size < 2
   exit
 end
 
-address, command = ARGV[0], ARGV[1]
+address = ARGV[0]
+command = ARGV[1..].join(" ")
 client = Byraft::GRPC::Stub.new(address, :this_channel_is_insecure)
 begin
   res = client.append_log(Byraft::GRPC::AppendLogRequest.new(command: command))

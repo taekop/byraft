@@ -3,9 +3,9 @@ module Byraft
     module ElectionTimer
       attr_accessor :heartbeat_time, :election_timeout, :next_election_timeout
 
-      def reset_election_timer!
+      def reset_election_timer!(start: false)
         @heartbeat_time = Time.now.to_f
-        @next_election_timeout = rand(@election_timeout)
+        @next_election_timeout = start ? 5.0 : rand(@election_timeout)
       end
 
       def election_timeout?
