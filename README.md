@@ -2,6 +2,8 @@
 
 Byraft is an implementation of Raft consensus algorithm in Ruby using gRPC.
 
+<img width="80%" src="https://user-images.githubusercontent.com/38203748/182122278-e61c3aad-8144-441f-9e59-3ed43b5a5fdb.gif"/>
+
 ## Install
 
 ```shell
