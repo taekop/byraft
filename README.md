@@ -65,7 +65,7 @@ bundle exec rspec
 ## TODO
 
 - [Liveness in the face of Network Faults](https://decentralizedthoughts.github.io/2020-12-12-raft-liveness-full-omission/)
-- Make gem
+- Dynamic Membership
 
 ## Reference
 
